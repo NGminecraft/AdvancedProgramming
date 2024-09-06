@@ -1,12 +1,15 @@
 """
 Nicholas Graham
 Caesar Shift function for Algorithms and Data Structures
+Slightly overcomplicated and way overdue, but it works pretty well
+NLTK is required for the cracking algorithm, but everything else can run without it
 """
 canMultiprocess = True
 try:
     import multiprocessing as mp
 except ImportError:
     canMultiprocess = False
+    print("Multiprocessing unavailable")
     
 canSpellCheck = True
 try:
@@ -41,8 +44,6 @@ class CipherCracking:
 
     def crack(self, string, shift):
         string = string.lower()
-        if not canSpellCheck:
-            quit("Please install nltk module (pip install nltk)")
         result = []
         if canMultiprocess:
             # This is the multithreaded aspect
@@ -62,14 +63,14 @@ class CipherCracking:
                     result.append(f'Found "{v[0]}" with key of {v[1]}')
             # Figures out what one is most likely (based on most correct words)
             if highest_word:
-                result.append(f"Most likely is {highest_word[0]} with key {highest_word[1]}")
+                result.append(f'Most likely is "{highest_word[0]}" with key {highest_word[1]}')
         else:
             # For the nerds that can't multithread heres the implementation
             for i in range(26):
                 item = self.threadedCrack(i)
                 if item[0] != None:
                     result.append(f'Found "{v[0]}" with key of {v[1]}')
-            result.append(f"Most likely is {highest_word[0]} with key {highest_word[1]}")
+            result.append(f'Most likely is "{highest_word[0]}" with key {highest_word[1]}')
                 
                 
         if result == []:
@@ -138,16 +139,21 @@ def gatherInput():
             print("--INVALID INPUT--")
             return gatherInput()
     
-        string = input("\rWhat string do you want to encode/decode: ")
-        shift = input("\rWhat is the shift: ")
+        string = input("What string do you want to encode/decode: ")
+        shift = input("What is the shift: ")
         if shift.isnumeric():
             shift = int(shift)
         else:
-            print("\rshift is not an integer")
+            print("shift is not an integer")
             return gatherInput()
         return func_obj, string, shift%26
     else:
-        string = input("\rWhat is the encrypted string (outputs will be lowercase): ")
+        
+        if not canSpellCheck: # This is only required for the cracking function
+            quit("Please install nltk module (pip install nltk)")
+        
+        string = input("What is the encrypted string (outputs will be lowercase): ")
+        
         #prep the cracker
         cracker = CipherCracking()
         return cracker.crack, string, None
